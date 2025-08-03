@@ -6,34 +6,13 @@ from langchain_core.output_parsers import JsonOutputParser,PydanticToolsParser
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain_groq import ChatGroq
-# from schemas import AnswerQuestion
-
-
-
-
-
-from typing import List
-from pydantic import BaseModel,Field
-
-class Reflection(BaseModel):
-    missing: str = Field(description="Critique of what is missing.")
-    superfluous: str = Field(description="Critique of what is superfluous")
-
-class AnswerQuestion(BaseModel):
-    answer: str = Field(description="~250 word detailed answer to the question")
-    reflection: Reflection = Field(description="Your reflection on the initial answer.")
-    search_queries: List[str] = Field(description="1-3 search queries for researching improvements to address the critique of your current answer.")
-
-
-
-
-
+from schemas import AnswerQuestion,ReviseAnswer
 
 groq_api_key = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(api_key=groq_api_key,model="llama3-8b-8192")
 
 parser = JsonOutputParser(return_id=True)
-parser_pydantic = PydanticToolsParser(tools=[AnswerQuestion,Reflection])
+parser_pydantic = PydanticToolsParser(tools=[AnswerQuestion])
 
 actor_prompt_template = ChatPromptTemplate.from_messages(
     [
@@ -57,6 +36,20 @@ first_responder_prompt_template = actor_prompt_template.partial(
 )
 
 first_responder = first_responder_prompt_template | llm.bind_tools(tools=[AnswerQuestion],tool_choice="AnswerQuestion")
+
+revise_instructions = """Revise your previous answer using the new information.
+    - You should use the previous critique to add important information to your answer.
+        - You MUST include numerical citations in your revised answer to ensure it can be verified.
+        - Add a "References" section to the bottom of your answer (which does not count towards the word limit). In form of:
+            - [1] https://example.com
+            - [2] https://example.com
+    - You should use the previous critique to remove superfluous information from your answer and make SURE it is not more than 250 words.
+"""
+
+
+revisor = actor_prompt_template.partial(
+    first_instruction=revise_instructions
+) | llm.bind_tools(tools=[ReviseAnswer], tool_choice="ReviseAnswer")
 
 if __name__ == "__main__":
     human_message = HumanMessage(

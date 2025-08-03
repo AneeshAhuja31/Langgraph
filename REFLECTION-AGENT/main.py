@@ -45,7 +45,8 @@ builder.add_conditional_edges(GENERATE, should_continue, {END:END,REFLECT:REFLEC
 builder.add_edge(REFLECT,GENERATE)
 
 graph = builder.compile()
-# print(graph.get_graph().draw_mermaid())
+from IPython.display import display,Image
+display(Image(graph.get_graph().draw_mermaid()))
 
 if __name__ == "__main__":
     print(GEMINI_API_KEY)
