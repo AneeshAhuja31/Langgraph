@@ -1,20 +1,57 @@
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
-from langchain_tavily import TavilySearch
-from langchain_core.tools import StructuredTool
-from langgraph.prebuilt import ToolNode
+from typing import List
+from langgraph.prebuilt import ToolInvocation
+from langchain_core.messages import BaseMessage, ToolMessage, HumanMessage, AIMessage
 from schemas import AnswerQuestion,ReviseAnswer
+from chains import parser_pydantic
 
-tavily_tool = TavilySearch(max_results=5)
+def execute_tools(state:List[BaseMessage]) -> List[ToolMessage]:
+    tool_invocation : AIMessage = state[-1]
+    parsed_tool_calls = parser_pydantic.invoke(tool_invocation)
+    ids = []
+    tool_invocations = []
+    for parsed_call in parsed_tool_calls:
+        for query in parsed_call.search_queries:
+            tool_invocations.append(ToolInvocation(
+                tool="tavily_search_results_json",
+                tool_input = query
+            ))
+            
+if __name__ == "__main__":
+    print("Tool Executor Enter")
 
-def run_queries(search_queries:list[str],**kwargs):
-    """Run the generated queries"""
-    return tavily_tool.batch([{"query":query} for query in search_queries])
+    human_message = HumanMessage(
+        content="""Write about AI-Powered SOC/autonomous soc problem domain,
+        list startups that do that and raised capital"""
+    )
 
-execute_tools = ToolNode(
-    [
-        StructuredTool.from_function(run_queries,name=AnswerQuestion.__name__),
-        StructuredTool.from_function(run_queries,name=ReviseAnswer.__name__)
-    ]
-)
+    answer = AnswerQuestion(
+        answer = "",
+        missing = "",
+        superfluous = "",
+        search_queries = [
+            "AI-powered SOC startups funding",
+            "AI SOC problem domain specifics",
+            "Technologies used by AI-powered SOC startups"
+        ],
+        id="call_KpYHichFFEmLitHFvFhKy1Ra"
+    )
+
+    raw_res = execute_tools(
+        state=[
+            human_message,
+            AIMessage(
+                content="",
+                tool_calls = [
+                    {
+                        "name": AnswerQuestion.__name__,
+                        "args":answer.dict(),
+                        "id":"call_KpYHichFFEmLitHFFvFhKy1Ra"
+                    }
+                ]
+            )
+        ]
+    )
+    print(raw_res)
