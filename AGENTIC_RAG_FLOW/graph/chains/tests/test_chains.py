@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 from AGENTIC_RAG_FLOW.graph.chains.retriever_grader import GradeDocuments, retrieval_grader
+from AGENTIC_RAG_FLOW.graph.chains.generation import generation_chain
 from AGENTIC_RAG_FLOW.ingestion import retriever
 
 def test_retrieval_grader_answer_yes() -> None:
@@ -24,3 +25,9 @@ def test_retreival_grader_no() -> None:
     )
 
     assert res.binary_score == "no"
+
+def test_generation_chain() -> None:
+    question = "agent memory"
+    docs = retriever.invoke(question)
+    generation = generation_chain.invoke({"context":docs,"question":question})
+    print(generation)
