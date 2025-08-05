@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "AGENTIC-RAG-FLOW"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
