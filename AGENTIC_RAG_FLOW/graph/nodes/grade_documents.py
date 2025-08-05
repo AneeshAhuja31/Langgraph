@@ -18,7 +18,6 @@ def grade_documents(state:GraphState):
 
     filtered_docs = []
     web_search = False
-
     for d in documents:
         score = retrieval_grader.invoke(
             {"question":question,"document":d.page_content}
@@ -26,6 +25,7 @@ def grade_documents(state:GraphState):
         grade = score.binary_score
         if grade.lower() == "yes":
             print("---GRADE: DOCUMENT NOT RELEVANT---")
+            filtered_docs.append(d)
         else:
             print("---GRADE: DOCUMENT NOT RELEVANT---")
             web_search = True

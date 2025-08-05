@@ -1,7 +1,7 @@
 from typing import Any,Dict
 from langchain.schema import Document
 from langchain_tavily import TavilySearch
-from AGENTIC_RAG_FLOW.graph.state import GraphState
+from graph.state import GraphState
 from dotenv import load_dotenv
 load_dotenv()
 
