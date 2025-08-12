@@ -1,13 +1,11 @@
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
-from langchain_groq import ChatGroq
+from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
-load_dotenv()
 import os
-
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
-llm = ChatGroq(api_key=GROQ_API_KEY,model="llama3-8b-8192")
+load_dotenv(override=True)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+llm = ChatGoogleGenerativeAI(api_key = GEMINI_API_KEY,model="gemini-2.5-flash")
 
 class GradeDocuments(BaseModel):
     """Binary score for relevance check on retrieved documents."""

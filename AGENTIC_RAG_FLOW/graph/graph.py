@@ -25,8 +25,16 @@ def grade_generation_grounded_in_documents_and_question(state:GraphState) -> str
     question = state["question"]
     documents = state["documents"]
     generation = state["generation"]
-
-    score = hallucination_grader.invoke({"documents":documents,"generation":generation})
+    try:
+        print(f"Grading question: {question}")
+        print(f"Grading generation: {generation}")
+        
+        score = hallucination_grader.invoke({"documents":documents,"generation":generation})
+        print(f"Answer grader score: {score}")
+        
+    except Exception as e:
+        print(f"Error in answer grading: {e}")
+        
     is_grounded = score.binary_score
     if is_grounded:
         print("---DECISION: GENERATION IS GROUNDED IN DOCUMENTS---")

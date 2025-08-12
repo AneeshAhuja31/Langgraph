@@ -2,18 +2,21 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 from langchain_core.runnables import RunnableSequence
 from langchain_groq import ChatGroq
+from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+#GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 class GradeAnswer(BaseModel):
     binary_score: bool = Field(
         description= "Answer addresses the question, 'yes' or 'no'"
     )
 
-llm = ChatGroq(model="Llama3-8b-8192",api_key=GROQ_API_KEY)
+#llm = ChatGroq(model="Llama3-8b-8192",api_key=GROQ_API_KEY)
+llm = ChatGoogleGenerativeAI(api_key = GEMINI_API_KEY,model="gemini-2.5-flash")
 structured_llm_grader = llm.with_structured_output(GradeAnswer)
 
 system = """You are a grader assessing whether an answer addresses / resolves a question.
