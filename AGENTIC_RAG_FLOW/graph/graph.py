@@ -20,6 +20,7 @@ def decide_to_generate(state):
     else:
         print("---DECISION: GENERATE---")
         return GENERATE
+    
 def grade_generation_grounded_in_documents_and_question(state:GraphState) -> str:
     print("---CHECK HALLUCINATIONS---")
     question = state["question"]
@@ -55,12 +56,11 @@ def route_question(state:GraphState) -> str:
     print("---ROUTE QUESTION---")
     question = state["question"]
     source: RouteQuery = question_router.invoke({"question":question})
-    if source.datasource == WEBSEARCH:
-        print("---ROUTE QUESTION TO WEB SEARCH---")
-        return WEBSEARCH
-    elif source.datasource == "vectorstore":
+    if source.datasource == "vectorstore":
         print("---ROUTE QUESTION TO RAG---")
         return RETRIEVE
+    print("---ROUTE QUESTION TO WEB SEARCH---")
+    return WEBSEARCH
 
 graph = StateGraph(GraphState)
 
